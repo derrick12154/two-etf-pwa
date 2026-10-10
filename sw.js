@@ -1,7 +1,7 @@
-const VERSION = 'two-etf-pwa-v3';
-const STATIC = ['index.html','style.css','app.js','manifest.webmanifest','icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png'];
+const VERSION = 'two-etf-pwa-v4';
+const STATIC = ['index.html','style.css','app.js','auth.js','manifest.webmanifest','icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png'];
 const BASE = new URL('./', self.location.href);
-const DATA = new URL('data.json', BASE).href;
+const DATA = new URL('data.enc.json', BASE).href;
 const SAFE = new Set(STATIC.map(p=>new URL(p,BASE).href));
 SAFE.add(BASE.href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(STATIC))));
@@ -18,7 +18,7 @@ self.addEventListener('fetch',event=>{
         const response=await fetch(event.request);
         if(!response.ok||response.redirected||!response.headers.get('content-type')?.includes('json'))throw Error('Invalid response');
         const payload=await response.clone().json();
-        if(payload.strategyId!=='two-etf-v1'||payload.schemaVersion!==1)throw Error('Invalid snapshot');
+        if(payload.format!=='two-etf-encrypted-v1'||payload.algorithm!=='AES-GCM'||payload.iterations!==600000||typeof payload.ciphertext!=='string')throw Error('Invalid encrypted snapshot');
         await cache.put(DATA,response.clone());return response;
       }catch(error){const saved=await cache.match(DATA);if(saved){const h=new Headers(saved.headers);h.set('X-PWA-Offline','1');return new Response(await saved.blob(),{headers:h,status:200});}throw error;}
     })());return;

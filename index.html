@@ -15,7 +15,14 @@
   <title>双市场趋势</title>
 </head>
 <body>
-  <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true">↗</span><div>双市场趋势<small>WEEKLY MOMENTUM</small></div></div><button id="refresh" class="icon-button" aria-label="检查已发布数据更新">↻</button></header>
+  <section id="login" class="login-screen" aria-labelledby="login-title">
+    <div class="app-tile" aria-hidden="true">↗</div><h1 id="login-title">双市场趋势</h1>
+    <p>输入访问密码，解锁每周信号与回测走势。</p>
+    <form id="login-form"><label for="password">访问密码</label><input id="password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-message"><button id="unlock" class="primary-button" type="submit">解锁应用</button><p id="login-message" role="status"></p></form>
+    <p class="caption">密码只在本机用于解密。关闭应用后需要重新解锁。</p>
+  </section>
+  <div id="app-shell" hidden>
+  <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true">↗</span><div>双市场趋势<small>WEEKLY MOMENTUM</small></div></div><div class="header-actions"><button id="logout" class="text-button" aria-label="退出登录">退出</button><button id="refresh" class="icon-button" aria-label="检查已发布数据更新">↻</button></div></header>
   <main id="main">
     <div id="status" role="status" class="status">正在读取策略数据…</div>
     <section id="signal" class="view">
@@ -27,8 +34,8 @@
         <div class="allocation" aria-label="ETF与现金配置"><div id="allocation-fill"></div></div>
         <div class="hero-footer"><span>现金 <b id="cash">—</b></span><span id="execution"></span></div>
       </article>
-      <p class="caption">这是历史模型账户的持仓记录，未连接你的证券账户。</p>
-      <article class="card"><div class="card-title"><h2>最近完整周信号</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>理论目标仓位</span><b id="target">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption">周收盘生成信号 → 下一周首个可交易日开盘执行。此处展示已回测的最近一次决策。</p></article>
+      <p class="caption">上方是截至最新收盘的模型账户仓位，未连接你的证券账户。</p>
+      <article class="card"><div class="card-title"><h2>下周待执行信号</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>理论目标仓位</span><b id="target">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption">完整周收盘生成信号 → 下一周首个可交易日开盘执行。待执行计划不计入已发生的回测收益，实际开盘仓位会受价格跳空影响。</p></article>
       <div class="card-title outside"><h2>两只标的 · 26周强弱</h2><span>资格过滤</span></div>
       <div id="candidates"></div>
       <article class="card compact"><div class="card-title"><h2>决策记录</h2><button class="text-button" id="show-history">展开</button></div><div id="decision-history" hidden></div></article>
@@ -61,13 +68,14 @@
       <div class="section-label">随身查看 <span>PWA</span></div>
       <div class="app-tile" aria-hidden="true">↗</div><h1 class="page-heading">把趋势<br>放在主屏幕。</h1>
       <article class="card"><h2>在 iPhone 上安装</h2><ol class="steps"><li>在 Safari 打开部署后的 HTTPS 地址。</li><li>点“分享”，选择“添加到主屏幕”。</li><li>如出现“作为网页 App 打开”，保持开启，再点“添加”。</li></ol><p id="install-state" class="caption"></p><button id="native-install" class="primary-button" hidden>安装应用</button></article>
-      <article class="card"><h2>数据更新方式</h2><p>顶部 ↻ 会检查网站已发布的数据。网页本身不从券商获取行情，GitHub Pages 也不会自动计算信号。</p><p>每周更新行情、运行现有策略审计，再导出并发布新的 data.json。应用会保留上一次可用数据，断网时仍可查看。</p><button id="export-data" class="secondary-button">下载当前数据快照</button></article>
+      <article class="card"><h2>数据更新方式</h2><p>GitHub Actions 每周五21:17尝试更新，周六、周日09:17再次执行（北京时间，平台可能延迟）。抓取完整交易周行情和规模，重算固定策略并审计，通过后发布加密数据。</p><p>顶部 ↻ 读取最新发布结果。数据源异常或审计失败时保留上一次成功版本；始终查看行情日期。离线查看仍需密码解锁。</p><button id="export-data" class="secondary-button">下载当前数据快照</button></article>
       <article class="card"><h2>更新与离线</h2><p id="offline-state">首次联网打开后，应用资源会缓存到本机。</p><p class="caption">卸载应用或清理 Safari 网站数据会清除离线缓存。周度提醒、微信发送及自动交易暂未接入。</p></article>
       <article class="card"><h2>数据来源与核验</h2><p id="audit-state"></p><p class="caption" id="data-stamp"></p></article>
     </section>
     <noscript>请启用 JavaScript 后查看策略数据。</noscript>
   </main>
   <nav class="bottom-nav" aria-label="主要页面"><button data-tab="signal" aria-current="page"><span aria-hidden="true">◉</span>信号</button><button data-tab="performance"><span aria-hidden="true">⌁</span>走势</button><button data-tab="rules"><span aria-hidden="true">≡</span>规则</button><button data-tab="install"><span aria-hidden="true">⊞</span>安装</button></nav>
+  </div>
   <div id="toast" role="status" hidden></div>
   <script type="module" src="./app.js"></script>
 </body>
