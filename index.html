@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f2929">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="双市场趋势">
+  <meta name="description" content="创业板与纳斯达克100的周度趋势信号、波动率控仓和回测走势。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>双市场趋势</title>
+</head>
+<body>
+  <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true">↗</span><div>双市场趋势<small>WEEKLY MOMENTUM</small></div></div><button id="refresh" class="icon-button" aria-label="检查已发布数据更新">↻</button></header>
+  <main id="main">
+    <div id="status" role="status" class="status">正在读取策略数据…</div>
+    <section id="signal" class="view">
+      <div class="section-label">周度跟踪 <span id="connection">联网状态</span></div>
+      <article class="hero">
+        <div class="hero-top"><span class="eyebrow">模型持仓</span><span class="pill">波动率控仓</span></div>
+        <h1 id="holding">—</h1><p class="hero-code" id="holding-code"></p>
+        <div class="weight-line"><strong id="weight">—</strong><span>ETF 仓位</span></div>
+        <div class="allocation" aria-label="ETF与现金配置"><div id="allocation-fill"></div></div>
+        <div class="hero-footer"><span>现金 <b id="cash">—</b></span><span id="execution"></span></div>
+      </article>
+      <p class="caption">这是历史模型账户的持仓记录，未连接你的证券账户。</p>
+      <article class="card"><div class="card-title"><h2>最近完整周信号</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>理论目标仓位</span><b id="target">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption">周收盘生成信号 → 下一周首个可交易日开盘执行。此处展示已回测的最近一次决策。</p></article>
+      <div class="card-title outside"><h2>两只标的 · 26周强弱</h2><span>资格过滤</span></div>
+      <div id="candidates"></div>
+      <article class="card compact"><div class="card-title"><h2>决策记录</h2><button class="text-button" id="show-history">展开</button></div><div id="decision-history" hidden></div></article>
+    </section>
+    <section id="performance" class="view" hidden>
+      <div class="section-label">回测观察 <span id="range-dates"></span></div>
+      <div class="metrics" id="metrics"></div>
+      <article class="card chart-card"><div class="card-title"><h2>净值走势</h2><span id="nav-value" class="mono"></span></div>
+        <div class="segments" id="ranges" aria-label="走势时间范围"><button data-range="all" aria-pressed="true">全部</button><button data-range="3y" aria-pressed="false">近3年</button><button data-range="1y" aria-pressed="false">近1年</button><button data-range="ytd" aria-pressed="false">今年</button></div>
+        <div class="legend"><span><i class="strategy-dot"></i>轮动策略</span><span><i class="china-dot"></i>创业板持有</span><span><i class="us-dot"></i>纳指持有</span></div>
+        <canvas id="nav-chart" height="240" aria-label="策略与两只ETF持有的归一化净值走势" role="img"></canvas><p class="caption" id="chart-caption"></p>
+      </article>
+      <article class="card chart-card"><div class="card-title"><h2>策略回撤</h2><span class="caption">所选区间重新计算</span></div><canvas id="dd-chart" height="160" aria-label="策略相对区间历史高点的回撤" role="img"></canvas></article>
+      <article class="card"><div class="card-title"><h2>年度表现</h2><span>含交易成本</span></div><div id="annual"></div></article>
+      <p class="caption">回测采用复权行情、分数份额及单边5bp费用，现金零利息。未完整模拟最小交易单位、涨跌停和QDII溢价。ETF持有曲线为费用前对照。历史表现不代表未来收益。</p>
+    </section>
+    <section id="rules" class="view" hidden>
+      <div class="section-label">固定规则 <span>版本 1.0</span></div>
+      <h1 class="page-heading">让规则决定<br>何时进攻。</h1>
+      <article class="card"><h2>标的池</h2><p>创业板ETF <b>159915</b><br>纳斯达克100ETF <b>513100</b><br>无合格标的时持有现金。</p></article>
+      <div class="rule-list">
+        <article class="card rule"><span>01</span><div><h2>每4根有效周线选强</h2><p>26周涨幅严格大于0、周收盘严格高于40周均线、当时可用净资产严格大于10亿元。合格者中只选涨幅最强的一只。</p></div></article>
+        <article class="card rule"><span>02</span><div><h2>每周检查退出资格</h2><p>持仓失去任一资格，下一周首个可交易日开盘退出。非选强周退出后保持现金，等待原定选强日。</p></div></article>
+        <article class="card rule"><span>03</span><div><h2>波动大，仓位降低</h2><p>用63个实际日收益估计年化波动率。目标仓位＝min(100%，20% ÷ 年化波动率)，其余为现金。</p></div></article>
+        <article class="card rule"><span>04</span><div><h2>用缓冲减少小幅交易</h2><p>同标的仓位偏差未达5个百分点时维持仓位；预估组合风险超过22%时可直接减仓。首次建仓、切换和退出不受缓冲限制。</p></div></article>
+      </div>
+      <article class="card"><h2>信号与成交时点</h2><p>只使用完整周收盘信息，下一周首个可交易日开盘执行。四周相位锚定2020年1月6日，整周休市不计数，不因退出重新计时。</p><p class="caption">历史规模按报告日期＋100天近似可用；每周上涨不减仓、分步恢复及新增标的均未启用。</p></article>
+    </section>
+    <section id="install" class="view" hidden>
+      <div class="section-label">随身查看 <span>PWA</span></div>
+      <div class="app-tile" aria-hidden="true">↗</div><h1 class="page-heading">把趋势<br>放在主屏幕。</h1>
+      <article class="card"><h2>在 iPhone 上安装</h2><ol class="steps"><li>在 Safari 打开部署后的 HTTPS 地址。</li><li>点“分享”，选择“添加到主屏幕”。</li><li>如出现“作为网页 App 打开”，保持开启，再点“添加”。</li></ol><p id="install-state" class="caption"></p><button id="native-install" class="primary-button" hidden>安装应用</button></article>
+      <article class="card"><h2>数据更新方式</h2><p>顶部 ↻ 会检查网站已发布的数据。网页本身不从券商获取行情，GitHub Pages 也不会自动计算信号。</p><p>每周更新行情、运行现有策略审计，再导出并发布新的 data.json。应用会保留上一次可用数据，断网时仍可查看。</p><button id="export-data" class="secondary-button">下载当前数据快照</button></article>
+      <article class="card"><h2>更新与离线</h2><p id="offline-state">首次联网打开后，应用资源会缓存到本机。</p><p class="caption">卸载应用或清理 Safari 网站数据会清除离线缓存。周度提醒、微信发送及自动交易暂未接入。</p></article>
+      <article class="card"><h2>数据来源与核验</h2><p id="audit-state"></p><p class="caption" id="data-stamp"></p></article>
+    </section>
+    <noscript>请启用 JavaScript 后查看策略数据。</noscript>
+  </main>
+  <nav class="bottom-nav" aria-label="主要页面"><button data-tab="signal" aria-current="page"><span aria-hidden="true">◉</span>信号</button><button data-tab="performance"><span aria-hidden="true">⌁</span>走势</button><button data-tab="rules"><span aria-hidden="true">≡</span>规则</button><button data-tab="install"><span aria-hidden="true">⊞</span>安装</button></nav>
+  <div id="toast" role="status" hidden></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
