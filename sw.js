@@ -1,5 +1,5 @@
-const VERSION = 'two-etf-pwa-v2';
-const STATIC = ['index.html','style.css','app.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png'];
+const VERSION = 'two-etf-pwa-v3';
+const STATIC = ['index.html','style.css','app.js','manifest.webmanifest','icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png'];
 const BASE = new URL('./', self.location.href);
 const DATA = new URL('data.json', BASE).href;
 const SAFE = new Set(STATIC.map(p=>new URL(p,BASE).href));
