@@ -36,6 +36,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -71,6 +73,8 @@ jobs:
             git commit -m 'Update audited encrypted weekly snapshot'
             git push origin HEAD:main
           fi
+      - name: Include the convertible-bond PWA in the shared Pages site
+        run: python convertible-bond/scripts/build_site.py --site _site --cb-only
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

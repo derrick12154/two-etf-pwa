@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1723">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="转债月调仓">
+  <meta name="description" content="可转债溢价偏离策略：月度调仓、等权仓位与行情风险筛选。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>转债月调仓</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div>
+          <div class="brand-name">转债月调仓</div>
+          <div class="brand-subtitle">PREMIUM DEVIATION · CN BONDS</div>
+        </div>
+      </div>
+      <button class="icon-button" id="refresh-button" type="button" aria-label="刷新数据" title="刷新数据">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.4-3"/></svg>
+      </button>
+    </header>
+
+    <main id="app-content">
+      <section class="hero-card" aria-labelledby="hero-title">
+        <div class="hero-topline">
+          <span class="live-pill"><i></i><span id="snapshot-state">策略快照</span></span>
+          <span class="date-label">行情截至 <b id="as-of-date">—</b></span>
+        </div>
+        <p class="eyebrow">每月首个交易日 · 前收信号 / 开盘执行</p>
+        <h1 id="hero-title">低偏离，<br><em>按月轮动。</em></h1>
+        <p class="hero-copy">同类券估值偏离排序，叠加价格、收益率与正股门槛。最多十只；新增券均分可用现金，已有持仓保持数量。</p>
+        <div class="hero-bottom">
+          <div class="hero-stat">
+            <span class="hero-stat-value" id="candidate-count">—</span>
+            <span class="hero-stat-label">只通过风控</span>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">10<span class="unit">只</span></span>
+            <span class="hero-stat-label">持仓数量上限</span>
+          </div>
+          <div class="target-badge">按月调仓 <span>↗</span></div>
+        </div>
+        <p class="update-status" id="update-status" role="status">正在载入收盘快照…</p>
+      </section>
+
+      <section class="metrics-section" aria-labelledby="performance-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">HISTORICAL BACKTEST</p><h2 id="performance-title">策略回测</h2></div>
+          <span class="period-label" id="backtest-period">—</span>
+        </div>
+        <div class="metric-grid">
+          <article class="metric-card metric-primary">
+            <span class="metric-label">年化收益</span>
+            <strong id="annualized-return">—</strong>
+            <span class="metric-foot">月度调仓 · 风控版</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">最大回撤</span>
+            <strong class="negative" id="max-drawdown">—</strong>
+            <span class="metric-foot">历史区间</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Sharpe</span>
+            <strong id="sharpe-ratio">—</strong>
+            <span class="metric-foot">无风险利率按 0</span>
+          </article>
+        </div>
+        <p class="backtest-note"><span class="note-dot"></span>历史代理回测区间固定如上；候选行情及全市场拟合图自动更新。</p>
+      </section>
+
+      <section class="chart-section" aria-labelledby="performance-chart-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">PERFORMANCE COMPARISON</p><h2 id="performance-chart-title">净值走势</h2></div>
+          <span class="period-label" id="chart-period">—</span>
+        </div>
+        <div class="chart-card">
+          <div class="chart-legend" id="performance-legend" aria-label="走势对照组"></div>
+          <div class="chart-wrap" id="performance-chart" role="img" aria-label="可转债策略、标普500和红利低波的归一化走势"></div>
+          <div class="performance-returns" id="performance-returns"></div>
+          <p class="chart-note" id="performance-method">—</p>
+        </div>
+      </section>
+
+      <section class="chart-section fit-section" aria-labelledby="fit-chart-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">FULL MARKET VALUATION</p><h2 id="fit-chart-title">全市场转债拟合曲线</h2></div>
+          <span class="period-label" id="fit-as-of">—</span>
+        </div>
+        <div class="chart-card">
+          <div class="fit-stats" id="fit-stats"></div>
+          <div class="chart-legend fit-legend">
+            <span><i class="legend-dot actual"></i>实际转股溢价率</span>
+            <span><i class="legend-line"></i>模型合理溢价率</span>
+          </div>
+          <div class="chart-wrap fit-chart-wrap" id="fit-chart" role="img" aria-label="全市场可转债实际溢价率散点和模型拟合曲线"></div>
+          <p class="chart-note" id="fit-method">—</p>
+        </div>
+      </section>
+
+      <section class="candidates-section" aria-labelledby="candidates-title">
+        <div class="section-heading candidates-heading">
+          <div><p class="eyebrow">MONTHLY WATCHLIST</p><h2 id="candidates-title">本期候选</h2></div>
+          <button class="text-button" type="button" data-tab="watchlist">全部 <span>→</span></button>
+        </div>
+        <div class="filter-row" aria-label="风控条件">
+          <span>价格 90–120</span><span>YTM 0–10%</span><span>正股 ≥ 1.5</span><span>排除强赎</span>
+        </div>
+        <div class="bond-list" id="bond-list" aria-live="polite"></div>
+        <div class="cash-note">
+          <div class="cash-icon" aria-hidden="true">◷</div>
+          <div><strong>候选清单用于观察</strong><span>实际持仓按月换券；新券均分可用现金，持仓比例会随价格变化。</span></div>
+          <span class="cash-arrow">↗</span>
+        </div>
+      </section>
+
+      <section class="rules-section" id="rules-panel" aria-labelledby="rules-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">PORTFOLIO RULES</p><h2 id="rules-title">仓位与风控</h2></div></div>
+        <div class="rule-card">
+          <div class="rule-row"><span class="rule-icon">01</span><div><strong>月度调仓</strong><p>每月首个交易日，用前一交易日收盘信号，按开盘价模拟成交。</p></div></div>
+          <div class="rule-row"><span class="rule-icon">02</span><div><strong>初始等权 · 持仓不再平衡</strong><p>最多 10 只；新买标的均分可用现金，已有持仓保持数量，比例随价格变化。候选不足时可能集中于较少标的。</p></div></div>
+          <div class="rule-row"><span class="rule-icon">03</span><div><strong>入场行情筛选</strong><p>转债 90–120 元、YTM 0–10%、正股价格不低于 1.5 元。</p></div></div>
+          <div class="rule-row"><span class="rule-icon">04</span><div><strong>强赎与换仓</strong><p>强赎公告后不再作为新买候选；只有偏离更低且价格更低的候选才替换持仓。</p></div></div>
+        </div>
+        <div class="method-card"><span class="method-kicker">偏离度怎么算</span><p>实际转股溢价率减去同日同类券模型估算的合理溢价率。数值越低，代表相对模型曲线越便宜。</p></div>
+        <div class="method-card"><span class="method-kicker">自动更新与安装</span><p>GitHub Actions 在交易日收盘后同步行情，次日早晨补跑；节假日沿用最近交易日。候选随行情变化，调仓仍按月。数据校验失败时保留上一次成功快照。</p><p>iPhone 请在 Safari 打开网页，点分享，再选“添加到主屏幕”。首次联网载入后可离线查看已保存快照。</p></div>
+        <p class="disclaimer">页面候选用于策略跟踪，不是自动下单或个性化投资建议。回测按历史收盘信号与下一交易日开盘成交估算，佣金、滑点、停牌冲击及部分退市风险未完全覆盖。</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-item active" type="button" data-tab="overview" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3zM13 21h8V11h-8zM13 3h8v4h-8zM3 17h8v4H3z"/></svg><span>总览</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="watchlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="7" cy="5" r="1"/><circle cx="7" cy="12" r="1"/><circle cx="7" cy="19" r="1"/></svg><span>候选</span>
+      </button>
+      <button class="nav-item" type="button" data-tab="rules">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 7v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z"/><path d="m9 12 2 2 4-4"/></svg><span>规则</span>
+      </button>
+    </nav>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="./app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+name: Convertible bond market data and PWA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'convertible-bond/**'
+      - '.github/workflows/convertible-bond.yml'
+  schedule:
+    # Beijing 23:35 on weekdays, with a 07:35 next-morning retry.
+    # Chinese market holidays keep the latest verified closing snapshot.
+    - cron: '35 15 * * 1-5'
+    - cron: '35 23 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}convertible-bond/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: convertible-bond/requirements.txt
+      - name: Install pinned market-model dependencies
+        run: python -m pip install -r convertible-bond/requirements.txt
+      - name: Fetch and validate the closing market snapshot
+        run: python convertible-bond/scripts/update_market.py
+      - name: Preserve the verified market snapshot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- convertible-bond/data/strategy.json convertible-bond/data/fit_curve.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update verified convertible bond market snapshot'
+            git push origin HEAD:main
+          fi
+      - name: Build both PWA apps from the verified snapshots
+        run: python convertible-bond/scripts/build_site.py --site _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Publish the installable PWA
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Write update summary
+        shell: python
+        run: |
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('convertible-bond/data/strategy.json').read_text())
+          summary = f"Market as of {data['asOf']}; {len(data['bonds'])} candidates.\n\n"
+          summary += "Data and fitted curve refresh after the close; rebalance cadence stays monthly.\n"
+          summary += "Historical backtest retains its explicitly labelled research period.\n"
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write(summary)
