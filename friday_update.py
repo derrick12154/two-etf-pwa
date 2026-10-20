@@ -27,7 +27,7 @@ from volatility_research import simulate, audit, volatility_panel, risk_weight, 
 
 EFFECTIVE_THURSDAY = pd.Timestamp('2026-10-22')
 STRATEGY_ID = 'two-etf-thu-fri-v2'
-ENGINE_VERSION = 'thu-fri-2026-10-20.1'
+ENGINE_VERSION = 'thu-fri-2026-10-20.2'
 
 
 def iso(date):
@@ -35,9 +35,10 @@ def iso(date):
 
 
 def safe_quote_day(now):
-    """Allow today's completed daily bar only after the 15:30 China-time guard."""
+    """Friday can confirm after 15:30; other days retain the source's 18:00 guard."""
     local = now.astimezone(ZoneInfo('Asia/Shanghai'))
-    return pd.Timestamp(local.date()) - pd.Timedelta(days=0 if (local.hour, local.minute) >= (15, 30) else 1)
+    cutoff = (15, 30) if local.weekday() == 4 else (18, 0)
+    return pd.Timestamp(local.date()) - pd.Timedelta(days=0 if (local.hour, local.minute) >= cutoff else 1)
 
 
 def snapshot_is_current(previous, as_of, end):
@@ -322,7 +323,7 @@ def build_record(seed, directory, calendar, as_of):
     next_thursday = max(next_thursday, EFFECTIVE_THURSDAY)
     next_friday = next_thursday + pd.Timedelta(days=1)
     # The next scheduled attempt is Thu night, Fri before-tail, or Fri after-close.
-    next_refresh = (as_of + pd.Timedelta(days=1)) if as_of.weekday() == 3 else next_thursday
+    next_refresh = (as_of + pd.Timedelta(days=1)) if as_of.weekday() == 3 and latest['status'] == 'pending_friday_close' else next_thursday
     return dict(schemaVersion=2, strategyId=STRATEGY_ID, engineVersion=ENGINE_VERSION, calculationAsOf=iso(as_of), title='双市场趋势', mode='automated_thursday_friday',
         generatedAt=datetime.now(ZoneInfo('UTC')).isoformat(), priceAsOf=iso(end), signalAsOf=iso(signal_date),
         positionAsOf=confirmed['executionDate'], positionTiming=confirmed['executionTiming'],
@@ -381,7 +382,14 @@ def main():
     directory.mkdir()
     try:
         assert directory.resolve().is_relative_to(workroot.resolve())
-        legacy.fetch_snapshot(seed, directory, calendar, end)
+        try:
+            legacy.fetch_snapshot(seed, directory, calendar, end)
+        except ValueError as error:
+            if 'quotes lag' not in str(error):
+                raise
+            dates = {symbol: str(pd.read_csv(directory / 'prices' / f'{symbol}.csv', usecols=['date']).date.iloc[-1])
+                     for symbol in legacy.SYMBOLS + [legacy.CALENDAR_SYMBOL]}
+            raise ValueError(f'Expected closed quotes through {iso(end)}; latest provider dates {dates}. Keep previous confirmed snapshot and retry.') from None
         record = build_record(seed, directory, calendar, as_of)
         args.site.mkdir(parents=True, exist_ok=True)
         write_sealed(args.site / 'data.enc.json', record, password, salt=base64.b64decode(envelope['salt']))

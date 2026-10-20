@@ -120,6 +120,7 @@ class FridayUpdateTests(unittest.TestCase):
         self.assertEqual(record['latestSignal']['skipReason'], 'friday_closed')
         self.assertEqual(record['positionAsOf'], '2026-10-19')
         self.assertIsNone(record['pendingSignal'])
+        self.assertEqual(record['nextRefreshExpected'], '2026-10-29')
 
     def test_closed_thursday_uses_prior_session_in_same_week(self):
         calendar = self.calendar[self.calendar != pd.Timestamp('2026-10-22')]
@@ -140,6 +141,7 @@ class FridayUpdateTests(unittest.TestCase):
     def test_daily_close_is_not_used_during_friday_tail(self):
         self.assertEqual(update.safe_quote_day(datetime(2026, 10, 23, 14, 50, tzinfo=ZoneInfo('Asia/Shanghai'))), pd.Timestamp('2026-10-22'))
         self.assertEqual(update.safe_quote_day(datetime(2026, 10, 23, 15, 37, tzinfo=ZoneInfo('Asia/Shanghai'))), pd.Timestamp('2026-10-23'))
+        self.assertEqual(update.safe_quote_day(datetime(2026, 10, 20, 15, 45, tzinfo=ZoneInfo('Asia/Shanghai'))), pd.Timestamp('2026-10-19'))
 
     def test_weekend_reuses_successful_friday_confirmation(self):
         self.assertTrue(update.snapshot_is_current(self.friday, '2026-10-24', pd.Timestamp('2026-10-23')))
