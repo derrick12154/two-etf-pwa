@@ -7,14 +7,23 @@ on:
       - '*.html'
       - '*.css'
       - '*.js'
+      - '*.mjs'
       - '*.png'
       - '*.webmanifest'
       - 'weekly_engine.zip'
       - 'requirements-weekly.txt'
+      - 'friday_update.py'
+      - 'tests/test_friday_update.py'
+      - 'tests/test_signal_state.mjs'
       - '.github/workflows/weekly.yml'
   schedule:
-    # Beijing Friday 21:17, Saturday/Sunday 09:17. UTC cron; may be delayed.
-    - cron: '17 13 * * 5'
+    # Beijing: Thu 21:17 plan; Fri 14:17 plan retry; Fri 15:37 confirmation.
+    # Fri 18:17/21:17 and weekend 09:17 retry when data was not confirmed.
+    # Weekend 09:17 retries only. GitHub may delay scheduled runs.
+    - cron: '17 13 * * 4'
+    - cron: '17 6 * * 5'
+    - cron: '37 7 * * 5'
+    - cron: '17 10,13 * * 5'
     - cron: '17 1 * * 6,0'
   workflow_dispatch:
 
@@ -52,17 +61,26 @@ jobs:
           engine = pathlib.Path(os.environ['RUNNER_TEMP']) / 'weekly-engine'
           with zipfile.ZipFile('weekly_engine.zip') as archive:
               archive.extractall(engine)
+          shutil.copy2('friday_update.py', engine / 'friday_update.py')
           site = pathlib.Path('_site')
           site.mkdir()
-          for name in ['index.html','style.css','app.js','auth.js','sw.js','manifest.webmanifest',
+          for name in ['index.html','style.css','app.js','auth.js','signal-state.mjs','sw.js','manifest.webmanifest',
                        'icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png']:
               shutil.copy2(name, site / name)
           (site / '.nojekyll').touch()
-      - name: Fetch complete weeks, audit and encrypt new signals
+      - name: Check causal decisions, Friday accounting and display states
+        env:
+          PYTHONPATH: ${{ runner.temp }}/weekly-engine
+          ETF_ENGINE_PATH: ${{ runner.temp }}/weekly-engine
+          PWA_SNAPSHOT_TEST_OUTPUT: ${{ runner.temp }}/friday-model-test-snapshots.json
+        run: |
+          python -m unittest discover -s tests -p test_friday_update.py
+          node tests/test_signal_state.mjs
+      - name: Fetch Thursday plan or confirm Friday-tail model position
         env:
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
           MPLCONFIGDIR: ${{ runner.temp }}/matplotlib
-        run: python "$RUNNER_TEMP/weekly-engine/weekly_update.py" --site _site
+        run: python "$RUNNER_TEMP/weekly-engine/friday_update.py" --site _site
       - name: Preserve the last verified encrypted snapshot
         run: |
           cp _site/data.enc.json data.enc.json

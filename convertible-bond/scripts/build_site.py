@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 APP = Path(__file__).resolve().parents[1]
-ROOT_FILES = ["index.html", "style.css", "app.js", "auth.js", "sw.js", "manifest.webmanifest",
+ROOT_FILES = ["index.html", "style.css", "app.js", "auth.js", "signal-state.mjs", "sw.js", "manifest.webmanifest",
               "icon-192.png", "icon-512.png", "maskable-512.png", "apple-touch-icon.png", "data.enc.json"]
 CB_FILES = ["index.html", "style.css", "app.js", "sw.js", "manifest.webmanifest", "icon.svg",
             "icon-192.png", "icon-512.png", "apple-touch-icon.png"]
@@ -43,3 +43,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

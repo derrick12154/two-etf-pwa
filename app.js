@@ -1,7 +1,6 @@
 import {validateEnvelope,unlockKey,decryptSnapshot} from './auth.js';
+import {NAMES,REASONS,validateSnapshot,signalPresentation,snapshotStatus} from './signal-state.mjs';
 const $=id=>document.getElementById(id);
-const NAMES={sz159915:'创业板ETF',sh513100:'纳斯达克100ETF',CASH:'现金'};
-const REASONS={asset_change:'切换／建仓',risk_excess:'风险超限调整',band_exceeded:'偏差达到缓冲阈值',hold_band:'缓冲区内维持',scheduled:'例行调整'};
 const percent=(v,d=1)=>Number.isFinite(v)?`${(v*100).toFixed(d)}%`:'—';
 const signed=v=>`${v>=0?'+':''}${percent(v)}`;
 let data, range='all', installPrompt, cached=false, toastTimer, chartRows=[];
@@ -11,34 +10,26 @@ try{localStorage.removeItem('two-etf-snapshot-v1');}catch{}
 
 function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4000);}
 function validate(p){
-  if(p?.schemaVersion!==1||p.strategyId!=='two-etf-v1'||p.mode!=='automated_weekly')throw Error('策略数据版本不兼容');
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(p.priceAsOf)||!/^\d{4}-\d{2}-\d{2}$/.test(p.signalAsOf)||p.signalAsOf>p.priceAsOf)throw Error('日期无效');
-  if(!NAMES[p.holding]||!Number.isFinite(p.exposure)||p.exposure<0||p.exposure>1.000001||!Array.isArray(p.history)||p.history.length<2)throw Error('数据不完整');
-  if(p.candidates.length!==2||new Set(p.candidates.map(c=>c.symbol)).size!==2||p.candidates.some(c=>!['sz159915','sh513100'].includes(c.symbol)))throw Error('标的池不符');
-  if(p.history.some((r,i)=>!/^\d{4}-\d{2}-\d{2}$/.test(r.date)||!Number.isFinite(r.nav)||r.nav<=0||!Number.isFinite(r.sz159915)||r.sz159915<=0||!Number.isFinite(r.sh513100)||r.sh513100<=0||(i>0&&r.date<=p.history[i-1].date)))throw Error('走势数据无效');
-  if(p.history.at(-1).date!==p.priceAsOf||!p.provenance?.acceptedBaselineIdentical||!p.provenance.selectionAudit?.passed||!p.provenance.portfolioAudit?.passed)throw Error('快照未经审计');
-  const s=p.pendingSignal;
-  if(!s?.auditPassed||s.status!=='pending_next_open'||s.signalDate!==p.signalAsOf||s.executionDate<=p.signalAsOf||!NAMES[s.asset]||!Number.isFinite(s.target)||s.target<0||s.target>1||!Number.isFinite(s.plannedWeight)||s.plannedWeight<0||s.plannedWeight>1.000001)throw Error('下周信号未通过核验');
-  return p;
+  return validateSnapshot(p);
 }
 function updateStatus(){
   if(!data)return;
-  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  const lag=Math.floor((Date.parse(today+'T00:00:00+08:00')-Date.parse((data.nextRefreshExpected||data.priceAsOf)+'T00:00:00+08:00'))/86400000);
   $('status').classList.remove('error');
-  $('status').textContent=`${cached?'离线／本机缓存 · ':''}${lag>2?'数据待更新 · ':''}自动周度数据：行情 ${data.priceAsOf}｜完整周信号 ${data.signalAsOf}｜下次更新周 ${data.nextRefreshExpected}。`;
+  $('status').textContent=snapshotStatus(data,cached);
   $('connection').textContent=cached?'读取加密缓存':'已发布周度数据';
 }
 function render(){
   updateStatus();
   $('holding').textContent=NAMES[data.holding];$('holding-code').textContent=data.holding==='CASH'?'等待原定选强日':`${data.holding.slice(2)} · 场内ETF`;
-  $('weight').textContent=percent(data.exposure,0);$('cash').textContent=percent(1-data.exposure,0);
+  $('weight').textContent=percent(data.exposure,1);$('cash').textContent=percent(1-data.exposure,1);
   $('allocation-fill').style.width=percent(data.exposure,3);
-  $('execution').textContent=`记录截至 ${data.priceAsOf}`;$('signal-date').textContent=data.signalAsOf;
-  const latest=data.pendingSignal;
-  const reason=latest.selection?'原定四周选强':latest.reason==='eligibility_exit'?'持仓资格失效，退出至现金':'本周检查持仓资格';
-  $('decision').textContent=`${reason}。计划 ${latest.executionDate} 开盘${latest.traded?'调整仓位':'维持配置'}：${NAMES[latest.asset]}，${latest.traded?'目标':'收盘参考'}仓位 ${percent(latest.plannedWeight,1)}。尚未执行。`;
-  $('target').textContent=percent(latest.target,0);$('sizing').textContent=REASONS[latest.sizingReason]||latest.sizingReason;
+  $('execution').textContent=data.schemaVersion===2?`仓位确认 ${data.positionAsOf}${data.positionTiming==='legacy_next_open'?' 开盘':' 盘后'}`:`记录截至 ${data.priceAsOf}`;
+  const shown=signalPresentation(data);
+  $('signal-title').textContent=shown.title;$('signal-date').textContent=shown.date;
+  $('decision').textContent=shown.description;$('signal-caption').textContent=shown.caption;
+  $('target').textContent=percent(shown.target,1);$('plan-weight').textContent=percent(shown.plannedWeight,1);
+  $('sizing').textContent=shown.sizing;$('execution-state').textContent=shown.state;
+  $('candidates-date').textContent=`参考 ${data.signalAsOf}`;
   $('candidates').replaceChildren(...data.candidates.map(c=>{
     const card=document.createElement('article');card.className='card candidate';
     card.innerHTML='<div class="candidate-top"><div class="asset-name"></div><strong class="gain"></strong></div><div class="eligibility"></div><div class="candidate-bottom"></div>';
@@ -56,7 +47,7 @@ function render(){
     const top=document.createElement('div');top.className='record-top';
     const title=document.createElement('b');title.textContent=`${d.executionDate} · ${NAMES[d.asset]}`;
     const tag=document.createElement('small');tag.textContent=d.selection?'四周选强':'周度检查';top.append(title,tag);
-    const p=document.createElement('p');p.textContent=`信号 ${d.signalDate}｜${d.reason==='eligibility_exit'?'资格退出':REASONS[d.sizingReason]||d.sizingReason}｜开盘模型仓位 ${percent(d.openWeight,0)}`;item.append(top,p);return item;
+    const p=document.createElement('p');p.textContent=`信号 ${d.signalDate}｜${d.reason==='eligibility_exit'?'资格退出':REASONS[d.sizingReason]||d.sizingReason}｜${d.executionTiming==='friday_close_proxy'?'尾盘':'开盘'}模型仓位 ${percent(d.executionWeight??d.openWeight,1)}`;item.append(top,p);return item;
   }));
   const stats=[['年化收益',data.summary.annual_return,'good'],['最大回撤',data.summary.max_drawdown,'bad'],['年化波动',data.summary.annual_vol,''],['平均ETF仓位',data.summary.average_exposure,'']];
   $('metrics').replaceChildren(...stats.map(([label,value,cls])=>{const item=document.createElement('div');item.className='metric';const s=document.createElement('span');s.textContent=label;const b=document.createElement('strong');b.className=cls;b.textContent=percent(value);item.append(s,b);return item;}));
@@ -87,7 +78,7 @@ async function load(manual=false){
   try{
     const {envelope,offline}=await encryptedData();
     const next=validate(await decryptSnapshot(envelope,session));cached=offline;
-    if(data&&next.priceAsOf<data.priceAsOf)throw Error('拒绝过期数据覆盖');
+    if(data&&(next.priceAsOf<data.priceAsOf||next.schemaVersion<data.schemaVersion||(next.priceAsOf===data.priceAsOf&&next.generatedAt<data.generatedAt)))throw Error('拒绝过期数据覆盖');
     const changed=data&&next.generatedAt!==data.generatedAt;data=next;
     cacheEnvelope(envelope);
     render();if(manual)toast(cached?'无法联网，继续使用上次快照':changed?'已载入新发布快照':'已检查，网站暂无更新');
@@ -116,7 +107,7 @@ function lock(){
   session=undefined;data=undefined;chartRows=[];
   $('app-shell').hidden=true;$('login').hidden=false;$('password').value='';
   for(const id of ['candidates','decision-history','metrics','annual'])$(id).replaceChildren();
-  for(const id of ['holding','holding-code','weight','cash','target','sizing','decision','execution','signal-date','status','nav-value','chart-caption','range-dates','audit-state','data-stamp'])$(id).textContent='—';
+  for(const id of ['holding','holding-code','weight','cash','target','plan-weight','execution-state','sizing','decision','execution','signal-date','candidates-date','status','nav-value','chart-caption','range-dates','audit-state','data-stamp'])$(id).textContent='—';
   for(const id of ['nav-chart','dd-chart']){const c=$(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
   $('password').focus();
 }
@@ -164,6 +155,8 @@ function tab(name){
 }
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
 $('refresh').addEventListener('click',()=>load(true));
+// Check published snapshots while the app stays open, including Friday's confirmation.
+setInterval(()=>{if(session&&!document.hidden)load();},5*60*1000);
 $('show-history').addEventListener('click',()=>{const hidden=!$('decision-history').hidden;$('decision-history').hidden=hidden;$('show-history').textContent=hidden?'展开':'收起';});
 document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>{range=b.dataset.range;document.querySelectorAll('[data-range]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));drawCharts();}));
 window.addEventListener('resize',drawCharts);

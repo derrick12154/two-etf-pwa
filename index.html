@@ -28,15 +28,15 @@
     <section id="signal" class="view">
       <div class="section-label">周度跟踪 <span id="connection">联网状态</span></div>
       <article class="hero">
-        <div class="hero-top"><span class="eyebrow">模型持仓</span><span class="pill">波动率控仓</span></div>
+        <div class="hero-top"><span class="eyebrow">已确认模型仓位</span><span class="pill">周四方案 · 周五尾盘</span></div>
         <h1 id="holding">—</h1><p class="hero-code" id="holding-code"></p>
         <div class="weight-line"><strong id="weight">—</strong><span>ETF 仓位</span></div>
         <div class="allocation" aria-label="ETF与现金配置"><div id="allocation-fill"></div></div>
         <div class="hero-footer"><span>现金 <b id="cash">—</b></span><span id="execution"></span></div>
       </article>
-      <p class="caption">上方是截至最新收盘的模型账户仓位，未连接你的证券账户。</p>
-      <article class="card"><div class="card-title"><h2>下周待执行信号</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>理论目标仓位</span><b id="target">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption">完整周收盘生成信号 → 下一周首个可交易日开盘执行。待执行计划不计入已发生的回测收益，实际开盘仓位会受价格跳空影响。</p></article>
-      <div class="card-title outside"><h2>两只标的 · 26周强弱</h2><span>资格过滤</span></div>
+      <p class="caption">上方是最近一次执行后确认的模型仓位，每周五尾盘执行后随盘后快照更新。周四的新方案单独显示；未连接你的证券账户。</p>
+      <article class="card"><div class="card-title"><h2 id="signal-title">本周调仓方案</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>执行目标仓位</span><b id="plan-weight">—</b></div><div><span>理论目标仓位</span><b id="target">—</b></div></div><div class="facts"><div><span>执行状态</span><b id="execution-state">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption" id="signal-caption">周四收盘后定方案 → 周五尾盘执行 → 盘后确认模型仓位。</p></article>
+      <div class="card-title outside"><h2>两只标的 · 26周强弱</h2><span id="candidates-date">方案日资格过滤</span></div>
       <div id="candidates"></div>
       <article class="card compact"><div class="card-title"><h2>决策记录</h2><button class="text-button" id="show-history">展开</button></div><div id="decision-history" hidden></div></article>
     </section>
@@ -53,22 +53,22 @@
       <p class="caption">回测采用复权行情、分数份额及单边5bp费用，现金零利息。未完整模拟最小交易单位、涨跌停和QDII溢价。ETF持有曲线为费用前对照。历史表现不代表未来收益。</p>
     </section>
     <section id="rules" class="view" hidden>
-      <div class="section-label">固定规则 <span>版本 1.0</span></div>
+      <div class="section-label">固定规则 <span>版本 2.0 · 2026-10-22启用</span></div>
       <h1 class="page-heading">让规则决定<br>何时进攻。</h1>
       <article class="card"><h2>标的池</h2><p>创业板ETF <b>159915</b><br>纳斯达克100ETF <b>513100</b><br>无合格标的时持有现金。</p></article>
       <div class="rule-list">
-        <article class="card rule"><span>01</span><div><h2>每4根有效周线选强</h2><p>26周涨幅严格大于0、周收盘严格高于40周均线、当时可用净资产严格大于10亿元。合格者中只选涨幅最强的一只。</p></div></article>
-        <article class="card rule"><span>02</span><div><h2>每周检查退出资格</h2><p>持仓失去任一资格，下一周首个可交易日开盘退出。非选强周退出后保持现金，等待原定选强日。</p></div></article>
+        <article class="card rule"><span>01</span><div><h2>每4根有效周线选强</h2><p>每周以周四收盘采样；周四休市时使用本周此前最后一个交易日。26周涨幅严格大于0、采样收盘严格高于40周均线、当时可用净资产严格大于10亿元。合格者中只选涨幅最强的一只。</p></div></article>
+        <article class="card rule"><span>02</span><div><h2>周四检查，周五尾盘执行</h2><p>周四收盘后确定标的和仓位；持仓失去任一资格，周五尾盘退出。非选强周退出后保持现金，等待原定选强日。周五不重新选标的。</p></div></article>
         <article class="card rule"><span>03</span><div><h2>波动大，仓位降低</h2><p>用63个实际日收益估计年化波动率。目标仓位＝min(100%，20% ÷ 年化波动率)，其余为现金。</p></div></article>
         <article class="card rule"><span>04</span><div><h2>用缓冲减少小幅交易</h2><p>同标的仓位偏差未达5个百分点时维持仓位；预估组合风险超过22%时可直接减仓。首次建仓、切换和退出不受缓冲限制。</p></div></article>
       </div>
-      <article class="card"><h2>信号与成交时点</h2><p>只使用完整周收盘信息，下一周首个可交易日开盘执行。四周相位锚定2020年1月6日，整周休市不计数，不因退出重新计时。</p><p class="caption">历史规模按报告日期＋100天近似可用；每周上涨不减仓、分步恢复及新增标的均未启用。</p></article>
+      <article class="card"><h2>方案、执行与仓位确认</h2><p>2026年10月22日起，周四收盘后定方案，周五尾盘执行买卖；周五盘后更新模型仓位和执行状态。模型以周五收盘价近似尾盘成交，实际成交价可能不同。周五休市或本周四之前无可用行情时，本周跳过，不自动改到周一。</p><p>此前历史保留原来的周收盘信号／下周开盘执行；四周选强继续沿用原有效市场周时钟，整周休市不计数，不因退出重新计时。</p><p class="caption">历史规模按报告日期＋100天近似可用；每周上涨不减仓、分步恢复及新增标的均未启用。</p></article>
     </section>
     <section id="install" class="view" hidden>
       <div class="section-label">随身查看 <span>PWA</span></div>
       <div class="app-tile" aria-hidden="true">↗</div><h1 class="page-heading">把趋势<br>放在主屏幕。</h1>
       <article class="card"><h2>在 iPhone 上安装</h2><ol class="steps"><li>在 Safari 打开部署后的 HTTPS 地址。</li><li>点“分享”，选择“添加到主屏幕”。</li><li>如出现“作为网页 App 打开”，保持开启，再点“添加”。</li></ol><p id="install-state" class="caption"></p><button id="native-install" class="primary-button" hidden>安装应用</button></article>
-      <article class="card"><h2>数据更新方式</h2><p>GitHub Actions 每周五21:17尝试更新，周六、周日09:17再次执行（北京时间，平台可能延迟）。抓取完整交易周行情和规模，重算固定策略并审计，通过后发布加密数据。</p><p>顶部 ↻ 读取最新发布结果。数据源异常或审计失败时保留上一次成功版本；始终查看行情日期。离线查看仍需密码解锁。</p><button id="export-data" class="secondary-button">下载当前数据快照</button></article>
+      <article class="card"><h2>每周两步更新</h2><p>周四21:17生成方案；周五14:17重试读取周四方案，15:37开始确认尾盘执行后的模型仓位。周五18:17、21:17及周六、周日09:17作为失败后的重试；已确认的结果直接复用（北京时间，GitHub可能延迟）。不安排每个交易日刷新仓位。</p><p>顶部 ↻ 读取最新发布结果，应用打开时也会定期检查。数据源异常或审计失败时保留上一次成功版本，并显示仓位确认日期。离线查看仍需密码解锁。</p><button id="export-data" class="secondary-button">下载当前数据快照</button></article>
       <article class="card"><h2>更新与离线</h2><p id="offline-state">首次联网打开后，应用资源会缓存到本机。</p><p class="caption">卸载应用或清理 Safari 网站数据会清除离线缓存。周度提醒、微信发送及自动交易暂未接入。</p></article>
       <article class="card"><h2>数据来源与核验</h2><p id="audit-state"></p><p class="caption" id="data-stamp"></p></article>
     </section>
