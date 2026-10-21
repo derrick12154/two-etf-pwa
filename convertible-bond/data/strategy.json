@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-20",
-  "updatedAt": "2026-10-21T03:32:13+08:00",
+  "asOf": "2026-10-21",
+  "updatedAt": "2026-10-22T03:30:52+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -21,52 +21,52 @@
   },
   "bonds": [
     {
-      "code": "127089",
-      "name": "晶澳转债",
-      "price": 111.219,
-      "deviation": -23.105697412313113,
-      "premium": 52.7544907407,
-      "fairPremium": 75.86018815301311,
-      "ytm": 0.026947336752984934,
-      "underlying": 6.479999999996
-    },
-    {
       "code": "118020",
       "name": "芳源转债",
-      "price": 114.127,
-      "deviation": -16.537030067345682,
-      "premium": 48.7689013035,
-      "fairPremium": 65.30593137084568,
-      "ytm": 4.195930606172171,
-      "underlying": 5.370000000001
+      "price": 113.025,
+      "deviation": -16.81322298251326,
+      "premium": 49.5604914934,
+      "fairPremium": 66.37371447591326,
+      "ytm": 4.736401056163688,
+      "underlying": 5.289999999998
+    },
+    {
+      "code": "128142",
+      "name": "新乳转债",
+      "price": 109.922,
+      "deviation": -16.386504343503482,
+      "premium": 27.4774685222,
+      "fairPremium": 43.86397286570348,
+      "ytm": 0.4473943646758039,
+      "underlying": 15.090000000005
     },
     {
       "code": "123088",
       "name": "威唐转债",
-      "price": 114.67,
-      "deviation": -15.93259680041033,
-      "premium": 44.131813602,
-      "fairPremium": 60.06441040241033,
-      "ytm": 1.8906815379273239,
-      "underlying": 11.91000000000405
+      "price": 114.66,
+      "deviation": -15.140017088667207,
+      "premium": 47.589011178,
+      "fairPremium": 62.72902826666721,
+      "ytm": 1.9843939347151736,
+      "underlying": 11.629999999993561
     },
     {
       "code": "123250",
       "name": "嘉益转债",
-      "price": 118.47,
-      "deviation": 76.18755857325141,
-      "premium": 197.7983938815,
-      "fairPremium": 121.6108353082486,
-      "ytm": 0.04879103146095303,
-      "underlying": 31.380000000028957
+      "price": 118.049,
+      "deviation": 85.09983008220763,
+      "premium": 208.6412038449,
+      "fairPremium": 123.54137376269236,
+      "ytm": 0.1385059325707539,
+      "underlying": 30.16999999997312
     }
   ],
-  "snapshotId": "7fbf2d1f72451eaf",
+  "snapshotId": "8fb5f9fa0e86d624",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 310,
-    "quotedActive": 310
+    "used": 311,
+    "quotedActive": 311
   }
 }
