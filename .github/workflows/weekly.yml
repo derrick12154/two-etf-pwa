@@ -13,6 +13,9 @@ on:
       - 'weekly_engine.zip'
       - 'requirements-weekly.txt'
       - 'friday_update.py'
+      - 'friday_update_v2.py'
+      - 'tests/test_risk_blend_update.py'
+      - 'tests/test_signal_blend.mjs'
       - 'tests/test_friday_update.py'
       - 'tests/test_signal_state.mjs'
       - '.github/workflows/weekly.yml'
@@ -62,6 +65,7 @@ jobs:
           with zipfile.ZipFile('weekly_engine.zip') as archive:
               archive.extractall(engine)
           shutil.copy2('friday_update.py', engine / 'friday_update.py')
+          shutil.copy2('friday_update_v2.py', engine / 'friday_update_v2.py')
           site = pathlib.Path('_site')
           site.mkdir()
           for name in ['index.html','style.css','app.js','auth.js','signal-state.mjs','sw.js','manifest.webmanifest',
@@ -73,9 +77,12 @@ jobs:
           PYTHONPATH: ${{ runner.temp }}/weekly-engine
           ETF_ENGINE_PATH: ${{ runner.temp }}/weekly-engine
           PWA_SNAPSHOT_TEST_OUTPUT: ${{ runner.temp }}/friday-model-test-snapshots.json
+          PWA_BLEND_SNAPSHOT_TEST_OUTPUT: ${{ runner.temp }}/blend-model-test-snapshots.json
         run: |
           python -m unittest discover -s tests -p test_friday_update.py
           node tests/test_signal_state.mjs
+          python -m unittest discover -s tests -p test_risk_blend_update.py
+          node tests/test_signal_blend.mjs
       - name: Fetch Thursday plan or confirm Friday-tail model position
         env:
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}

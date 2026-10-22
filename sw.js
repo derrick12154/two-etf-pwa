@@ -1,4 +1,4 @@
-const VERSION = 'two-etf-pwa-v5';
+const VERSION = 'two-etf-pwa-v6-risk-blend';
 const STATIC = ['index.html','style.css','app.js','auth.js','signal-state.mjs','manifest.webmanifest','icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png'];
 const BASE = new URL('./', self.location.href);
 const DATA = new URL('data.enc.json', BASE).href;

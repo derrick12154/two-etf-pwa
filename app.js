@@ -1,5 +1,5 @@
 import {validateEnvelope,unlockKey,decryptSnapshot} from './auth.js';
-import {NAMES,REASONS,validateSnapshot,signalPresentation,snapshotStatus} from './signal-state.mjs';
+import {NAMES,REASONS,validateSnapshot,signalPresentation,snapshotStatus,allocationText} from './signal-state.mjs';
 const $=id=>document.getElementById(id);
 const percent=(v,d=1)=>Number.isFinite(v)?`${(v*100).toFixed(d)}%`:'—';
 const signed=v=>`${v>=0?'+':''}${percent(v)}`;
@@ -20,34 +20,52 @@ function updateStatus(){
 }
 function render(){
   updateStatus();
-  $('holding').textContent=NAMES[data.holding];$('holding-code').textContent=data.holding==='CASH'?'等待原定选强日':`${data.holding.slice(2)} · 场内ETF`;
+  const blended=data.schemaVersion===3;
+  $('holding').textContent=NAMES[data.holding];$('holding-code').textContent=data.holding==='CASH'?'等待原定选强日':data.holding==='MIXED'?'159915 ＋ 513100 · 场内ETF':`${data.holding.slice(2)} · 场内ETF`;
+  const weights=blended?data.confirmedWeights:{sz159915:data.holding==='sz159915'?data.exposure:0,sh513100:data.holding==='sh513100'?data.exposure:0,CASH:1-data.exposure};
+  $('portfolio-weights').textContent=allocationText(weights);
+  $('ranking-policy-status').textContent=blended?'四份初始等资金，各自复利；当前按实际权益占比合并，不定期恢复等权。':`当前方案仍为原单相位规则。无规模门槛、26周风险排名和四相位合并自 ${data.scheduledPolicy?.effectiveDecisionDate||'2026-10-29'} 周四方案起启用。`;
   $('weight').textContent=percent(data.exposure,1);$('cash').textContent=percent(1-data.exposure,1);
   $('allocation-fill').style.width=percent(data.exposure,3);
-  $('execution').textContent=data.schemaVersion===2?`仓位确认 ${data.positionAsOf}${data.positionTiming==='legacy_next_open'?' 开盘':' 盘后'}`:`记录截至 ${data.priceAsOf}`;
+  $('execution').textContent=[2,3].includes(data.schemaVersion)?`仓位确认 ${data.positionAsOf}${data.positionTiming==='legacy_next_open'?' 开盘':' 盘后'}`:`记录截至 ${data.priceAsOf}`;
   const shown=signalPresentation(data);
   $('signal-title').textContent=shown.title;$('signal-date').textContent=shown.date;
   $('decision').textContent=shown.description;$('signal-caption').textContent=shown.caption;
   $('target').textContent=percent(shown.target,1);$('plan-weight').textContent=percent(shown.plannedWeight,1);
   $('sizing').textContent=shown.sizing;$('execution-state').textContent=shown.state;
-  $('candidates-date').textContent=`参考 ${data.signalAsOf}`;
+  $('candidates-date').textContent=`参考 ${data.candidateAsOf||data.signalAsOf}`;
+  $('candidates-heading').textContent=blended?'两只标的 · 26周风险分数':'两只标的 · 26周涨幅';
+  $('phase-plans').hidden=!blended;
+  if(blended){
+    $('aggregate-plan').textContent=shown.state==='休市安排'?'本周跳过执行':`周四估计合计：${allocationText(data.latestSignal.plannedWeights)}。周五仍按各份已冻结方案执行，成交后合计比例可能略有变化。`;
+    $('phase-plan-rows').replaceChildren(...data.latestSignal.sleeves.map(p=>{
+      const item=document.createElement('div');item.className='phase-plan-row';
+      const title=document.createElement('b');title.textContent=`第${p.phase+1}份 · ${p.selection?'本周选强':'周度检查'}`;
+      const state=document.createElement('span');state.textContent=p.status==='skipped_holiday'?'本周休市跳过':p.traded?`调至${NAMES[p.asset]} ${percent(p.plannedWeight)}（该份账户）`:`维持${NAMES[p.asset]}原份额`;
+      const detail=document.createElement('small');const sleeve=data.sleeves.find(x=>x.phase===p.phase);detail.textContent=`当前资金占比 ${percent(sleeve.equityWeight)} · ${REASONS[p.sizingReason]||'休市不执行'}`;
+      item.append(title,state,detail);return item;
+    }));
+  }
   $('candidates').replaceChildren(...data.candidates.map(c=>{
     const card=document.createElement('article');card.className='card candidate';
     card.innerHTML='<div class="candidate-top"><div class="asset-name"></div><strong class="gain"></strong></div><div class="eligibility"></div><div class="candidate-bottom"></div>';
     card.querySelector('.asset-name').textContent=c.name;
     const code=document.createElement('small');code.textContent=c.code;card.querySelector('.asset-name').append(code);
-    const gain=card.querySelector('.gain');gain.textContent=signed(c.momentum);gain.classList.toggle('negative',c.momentum<0);
-    for(const [label,pass] of [['26周正收益',c.momentum>0],['高于40周均线',c.maDistance>0],['规模>10亿元',c.assetsYi>10]]){
+    const gain=card.querySelector('.gain');gain.textContent=blended?(Number.isFinite(c.riskScore)?c.riskScore.toFixed(3):'—'):signed(c.momentum);gain.classList.toggle('negative',c.momentum<0);
+    const qualifications=[['26周正收益',c.momentum>0],['高于40周均线',c.maDistance>0]];
+    if(!blended)qualifications.push(['规模>10亿元',c.assetsYi>10]);
+    for(const [label,pass] of qualifications){
       const badge=document.createElement('span');badge.className=`badge ${pass?'':'fail'}`;badge.textContent=`${pass?'✓':'×'} ${label}`;card.querySelector('.eligibility').append(badge);
     }
-    card.querySelector('.candidate-bottom').textContent=`均线距离 ${signed(c.maDistance)} · 年化波动 ${percent(c.volatility)}`;
+    card.querySelector('.candidate-bottom').textContent=`${blended?`26周涨幅 ${signed(c.momentum)} · `:''}均线距离 ${signed(c.maDistance)} · 年化波动 ${percent(c.volatility)}`;
     return card;
   }));
   $('decision-history').replaceChildren(...data.decisions.map(d=>{
     const item=document.createElement('div');item.className='record';
     const top=document.createElement('div');top.className='record-top';
     const title=document.createElement('b');title.textContent=`${d.executionDate} · ${NAMES[d.asset]}`;
-    const tag=document.createElement('small');tag.textContent=d.selection?'四周选强':'周度检查';top.append(title,tag);
-    const p=document.createElement('p');p.textContent=`信号 ${d.signalDate}｜${d.reason==='eligibility_exit'?'资格退出':REASONS[d.sizingReason]||d.sizingReason}｜${d.executionTiming==='friday_close_proxy'?'尾盘':'开盘'}模型仓位 ${percent(d.executionWeight??d.openWeight,1)}`;item.append(top,p);return item;
+    const tag=document.createElement('small');tag.textContent=d.sleeves?'四相位合并':d.selection?'四周选强':'周度检查';top.append(title,tag);
+    const p=document.createElement('p');p.textContent=d.executionWeights?`信号 ${d.signalDate}｜${allocationText(d.executionWeights)}｜尾盘模型确认`:`信号 ${d.signalDate}｜${d.reason==='eligibility_exit'?'资格退出':REASONS[d.sizingReason]||d.sizingReason}｜${d.executionTiming==='friday_close_proxy'?'尾盘':'开盘'}模型仓位 ${percent(d.executionWeight??d.openWeight,1)}`;item.append(top,p);return item;
   }));
   const stats=[['年化收益',data.summary.annual_return,'good'],['最大回撤',data.summary.max_drawdown,'bad'],['年化波动',data.summary.annual_vol,''],['平均ETF仓位',data.summary.average_exposure,'']];
   $('metrics').replaceChildren(...stats.map(([label,value,cls])=>{const item=document.createElement('div');item.className='metric';const s=document.createElement('span');s.textContent=label;const b=document.createElement('strong');b.className=cls;b.textContent=percent(value);item.append(s,b);return item;}));
@@ -58,7 +76,7 @@ function render(){
     for(const [value,cls] of [[`${y.year}${String(y.year)===data.priceAsOf.slice(0,4)?'（截至期末）':''}`, ''],[signed(y.return),y.return>=0?'positive':'negative'],[percent(y.max_drawdown),'negative']]){const cell=document.createElement('span');cell.className=cls;cell.textContent=value;item.append(cell);}
     $('annual').append(item);
   }
-  $('audit-state').textContent=`${data.history.length} 个交易日 · 因果选强与持仓重建审计通过 · ${data.provenance.acceptedBaselineThrough}以前与已确认基准一致。`;
+  $('audit-state').textContent=`${data.history.length} 个交易日 · 因果选强与持仓重建审计通过 · ${data.provenance.acceptedBaselineThrough}以前与已确认基准一致。${blended?`四相位自 ${data.policy.effectiveDecisionDate} 起衔接，之前历史未按新规则回填。`:''}`;
   $('data-stamp').textContent=`计算时间 ${new Date(data.generatedAt).toLocaleString('zh-CN')}。行情时点以页面显示的交易日期为准。`;
   drawCharts();
 }

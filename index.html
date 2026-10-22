@@ -32,11 +32,13 @@
         <h1 id="holding">—</h1><p class="hero-code" id="holding-code"></p>
         <div class="weight-line"><strong id="weight">—</strong><span>ETF 仓位</span></div>
         <div class="allocation" aria-label="ETF与现金配置"><div id="allocation-fill"></div></div>
-        <div class="hero-footer"><span>现金 <b id="cash">—</b></span><span id="execution"></span></div>
+        <div class="hero-footer"><span>现金 <b id="cash">—</b></span><span id="execution"></span></div><p id="portfolio-weights" class="portfolio-weights"></p>
       </article>
       <p class="caption">上方是最近一次执行后确认的模型仓位，每周五尾盘执行后随盘后快照更新。周四的新方案单独显示；未连接你的证券账户。</p>
+      <p class="caption policy-note" id="ranking-policy-status">无规模门槛、26周风险排名＋四相位合并，自2026-10-29方案起启用。</p>
       <article class="card"><div class="card-title"><h2 id="signal-title">本周调仓方案</h2><span id="signal-date" class="mono"></span></div><p id="decision" class="decision"></p><div class="facts"><div><span>执行目标仓位</span><b id="plan-weight">—</b></div><div><span>理论目标仓位</span><b id="target">—</b></div></div><div class="facts"><div><span>执行状态</span><b id="execution-state">—</b></div><div><span>仓位处理</span><b id="sizing">—</b></div></div><p class="caption" id="signal-caption">周四收盘后定方案 → 周五尾盘执行 → 盘后确认模型仓位。</p></article>
-      <div class="card-title outside"><h2>两只标的 · 26周强弱</h2><span id="candidates-date">方案日资格过滤</span></div>
+      <article class="card" id="phase-plans" hidden><div class="card-title"><h2>四份资金方案</h2><span>分别执行</span></div><p id="aggregate-plan" class="caption"></p><div id="phase-plan-rows"></div></article>
+      <div class="card-title outside"><h2 id="candidates-heading">两只标的 · 26周风险分数</h2><span id="candidates-date">方案日资格过滤</span></div>
       <div id="candidates"></div>
       <article class="card compact"><div class="card-title"><h2>决策记录</h2><button class="text-button" id="show-history">展开</button></div><div id="decision-history" hidden></div></article>
     </section>
@@ -53,16 +55,16 @@
       <p class="caption">回测采用复权行情、分数份额及单边5bp费用，现金零利息。未完整模拟最小交易单位、涨跌停和QDII溢价。ETF持有曲线为费用前对照。历史表现不代表未来收益。</p>
     </section>
     <section id="rules" class="view" hidden>
-      <div class="section-label">固定规则 <span>版本 2.0 · 2026-10-22启用</span></div>
+      <div class="section-label">固定规则 <span>版本 3.0 · 2026-10-29方案起启用</span></div>
       <h1 class="page-heading">让规则决定<br>何时进攻。</h1>
       <article class="card"><h2>标的池</h2><p>创业板ETF <b>159915</b><br>纳斯达克100ETF <b>513100</b><br>无合格标的时持有现金。</p></article>
       <div class="rule-list">
-        <article class="card rule"><span>01</span><div><h2>每4根有效周线选强</h2><p>每周以周四收盘采样；周四休市时使用本周此前最后一个交易日。26周涨幅严格大于0、采样收盘严格高于40周均线、当时可用净资产严格大于10亿元。合格者中只选涨幅最强的一只。</p></div></article>
-        <article class="card rule"><span>02</span><div><h2>周四检查，周五尾盘执行</h2><p>周四收盘后确定标的和仓位；持仓失去任一资格，周五尾盘退出。非选强周退出后保持现金，等待原定选强日。周五不重新选标的。</p></div></article>
-        <article class="card rule"><span>03</span><div><h2>波动大，仓位降低</h2><p>用63个实际日收益估计年化波动率。目标仓位＝min(100%，20% ÷ 年化波动率)，其余为现金。</p></div></article>
+        <article class="card rule"><span>01</span><div><h2>四份资金，错开选强</h2><p>初始现金和持仓各分四份，每份每4个有效市场周选强，通常每周轮到一份。每周四采样，休市取本周此前最后一个交易日。资格为26周涨幅严格为正、收盘严格高于40周均线，不设10亿元规模门槛。合格者按“26周涨幅 ÷ 63日年化波动率”选最高者；同分先比原涨幅，再按固定顺序。</p></div></article>
+        <article class="card rule"><span>02</span><div><h2>周四检查，周五尾盘执行</h2><p>四份每周均检查资格，失效的份额周五尾盘退出；该份非选强周退出后保持现金，等原定选强日。周五不重新选标的。四份可分别持有创业板、纳指或现金，页面显示合计配置。</p></div></article>
+        <article class="card rule"><span>03</span><div><h2>每份独立控仓</h2><p>最近63个实际日收益的样本标准差乘√252，得到年化波动率。每份目标仓位＝min(100%，20% ÷ 年化波动率)，其余现金；各自复利，不互借资金、不恢复等权，合并后不再放大风险。每份成交分别计费。</p></div></article>
         <article class="card rule"><span>04</span><div><h2>用缓冲减少小幅交易</h2><p>同标的仓位偏差未达5个百分点时维持仓位；预估组合风险超过22%时可直接减仓。首次建仓、切换和退出不受缓冲限制。</p></div></article>
       </div>
-      <article class="card"><h2>方案、执行与仓位确认</h2><p>2026年10月22日起，周四收盘后定方案，周五尾盘执行买卖；周五盘后更新模型仓位和执行状态。模型以周五收盘价近似尾盘成交，实际成交价可能不同。周五休市或本周四之前无可用行情时，本周跳过，不自动改到周一。</p><p>此前历史保留原来的周收盘信号／下周开盘执行；四周选强继续沿用原有效市场周时钟，整周休市不计数，不因退出重新计时。</p><p class="caption">历史规模按报告日期＋100天近似可用；每周上涨不减仓、分步恢复及新增标的均未启用。</p></article>
+      <article class="card"><h2>切换与仓位确认</h2><p>2026年10月29日周四方案起采用无规模门槛、风险排名和四相位合并，首次执行为10月30日周五尾盘。原账户现金和份额各分为四份，不强制清仓；10月28日以前保留原策略历史，不追溯重算。已发布的10月22日方案及10月23日执行仍沿用旧规则。</p><p>周四确定每份标的和目标，周五按已冻结方案执行；合计参考比例按周四权益计算，周五成交后因价格变化可能略有不同。模型以周五收盘价近似尾盘成交。周五休市或本周此前无可用行情则跳过，不改到周一。四周时钟沿用2020-01-06起的有效市场周，整周休市不计数，退出不重新计时。</p><p class="caption">新规则不因规模或季度规模数据缺失否决候选；历史原策略的规模记录仅用于衔接核验。</p></article>
     </section>
     <section id="install" class="view" hidden>
       <div class="section-label">随身查看 <span>PWA</span></div>
