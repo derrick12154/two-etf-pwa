@@ -17,10 +17,10 @@ on:
       - 'tests/test_signal_state.mjs'
       - '.github/workflows/weekly.yml'
   schedule:
-    # Beijing: Thu 21:17 plan; Fri 14:17 plan retry; Fri 15:37 confirmation.
+    # Beijing: Thu 18:00 plan; Fri 14:17 plan retry; Fri 15:37 confirmation.
     # Fri 18:17/21:17 and weekend 09:17 retry when data was not confirmed.
     # Weekend 09:17 retries only. GitHub may delay scheduled runs.
-    - cron: '17 13 * * 4'
+    - cron: '0 10 * * 4'
     - cron: '17 6 * * 5'
     - cron: '37 7 * * 5'
     - cron: '17 10,13 * * 5'
