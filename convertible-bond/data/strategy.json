@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-22",
-  "updatedAt": "2026-10-23T03:23:04+08:00",
+  "asOf": "2026-10-23",
+  "updatedAt": "2026-10-24T03:29:54+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -21,52 +21,32 @@
   },
   "bonds": [
     {
-      "code": "118020",
-      "name": "芳源转债",
-      "price": 112.617,
-      "deviation": -17.394683176294002,
-      "premium": 53.3694552529,
-      "fairPremium": 70.764138429194,
-      "ytm": 4.943558538450363,
-      "underlying": 5.140000000002
-    },
-    {
       "code": "123088",
       "name": "威唐转债",
-      "price": 114.67,
-      "deviation": -15.781649968341206,
-      "premium": 48.2391968912,
-      "fairPremium": 64.02084685954121,
-      "ytm": 1.9613891469111904,
-      "underlying": 11.579999999994362
+      "price": 114.72,
+      "deviation": -16.763701752022953,
+      "premium": 44.5587878788,
+      "fairPremium": 61.32248963082295,
+      "ytm": 1.6930003974698613,
+      "underlying": 11.880000000004532
     },
     {
-      "code": "128142",
-      "name": "新乳转债",
-      "price": 109.92,
-      "deviation": -15.02306235339584,
-      "premium": 28.927613941,
-      "fairPremium": 43.95067629439584,
-      "ytm": 0.46696606418891157,
-      "underlying": 14.919999999992502
-    },
-    {
-      "code": "123250",
-      "name": "嘉益转债",
-      "price": 117.699,
-      "deviation": 87.08810956643887,
-      "premium": 213.864,
-      "fairPremium": 126.77589043356113,
-      "ytm": 0.2135182199049291,
-      "underlying": 29.58
+      "code": "118020",
+      "name": "芳源转债",
+      "price": 114.121,
+      "deviation": -16.19527933821655,
+      "premium": 49.8774859287,
+      "fairPremium": 66.07276526691655,
+      "ytm": 4.217435635839595,
+      "underlying": 5.330000000003
     }
   ],
-  "snapshotId": "61d36af01f1af688",
+  "snapshotId": "4131580853cf25b7",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 310,
-    "quotedActive": 310
+    "used": 311,
+    "quotedActive": 311
   }
 }
