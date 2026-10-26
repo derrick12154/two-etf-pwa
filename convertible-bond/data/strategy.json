@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-23",
-  "updatedAt": "2026-10-24T09:56:17+08:00",
+  "asOf": "2026-10-26",
+  "updatedAt": "2026-10-27T04:41:49+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -23,30 +23,30 @@
     {
       "code": "123088",
       "name": "威唐转债",
-      "price": 114.72,
-      "deviation": -16.76370175202296,
-      "premium": 44.5587878788,
-      "fairPremium": 61.32248963082296,
-      "ytm": 1.6930003974698613,
-      "underlying": 11.880000000004532
+      "price": 114.75,
+      "deviation": -16.40240726313862,
+      "premium": 47.3248284734,
+      "fairPremium": 63.72723573653862,
+      "ytm": 1.6013706570470299,
+      "underlying": 11.659999999993081
     },
     {
       "code": "118020",
       "name": "芳源转债",
-      "price": 114.121,
-      "deviation": -16.19527933821658,
-      "premium": 49.8774859287,
-      "fairPremium": 66.07276526691658,
-      "ytm": 4.217435635839595,
-      "underlying": 5.330000000003
+      "price": 114.851,
+      "deviation": -14.528717262759187,
+      "premium": 53.1346666667,
+      "fairPremium": 67.66338392945919,
+      "ytm": 3.88396186923501,
+      "underlying": 5.25
     }
   ],
-  "snapshotId": "4131580853cf25b7",
+  "snapshotId": "3c9b23b063b570ae",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 311,
-    "quotedActive": 311
+    "used": 310,
+    "quotedActive": 310
   }
 }
