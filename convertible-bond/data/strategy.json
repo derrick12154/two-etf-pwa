@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-26",
-  "updatedAt": "2026-10-27T04:41:49+08:00",
+  "asOf": "2026-10-27",
+  "updatedAt": "2026-10-28T04:12:11+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -21,32 +21,52 @@
   },
   "bonds": [
     {
+      "code": "128142",
+      "name": "新乳转债",
+      "price": 109.96,
+      "deviation": -16.517627397523633,
+      "premium": 35.6095842142,
+      "fairPremium": 52.12721161172363,
+      "ytm": 0.2556173199923274,
+      "underlying": 14.189999999997502
+    },
+    {
       "code": "123088",
       "name": "威唐转债",
-      "price": 114.75,
-      "deviation": -16.40240726313862,
-      "premium": 47.3248284734,
-      "fairPremium": 63.72723573653862,
-      "ytm": 1.6013706570470299,
-      "underlying": 11.659999999993081
+      "price": 114.706,
+      "deviation": -16.0100951612556,
+      "premium": 52.6354506667,
+      "fairPremium": 68.6455458279556,
+      "ytm": 1.92508150384356,
+      "underlying": 11.249999999999641
     },
     {
       "code": "118020",
       "name": "芳源转债",
-      "price": 114.851,
-      "deviation": -14.528717262759187,
-      "premium": 53.1346666667,
-      "fairPremium": 67.66338392945919,
-      "ytm": 3.88396186923501,
-      "underlying": 5.25
+      "price": 114.727,
+      "deviation": -14.725277293916513,
+      "premium": 59.6598409543,
+      "fairPremium": 74.38511824821651,
+      "ytm": 3.9494109905558634,
+      "underlying": 5.029999999997
+    },
+    {
+      "code": "123080",
+      "name": "海波转债",
+      "price": 119.962,
+      "deviation": -8.986680646031786,
+      "premium": 45.3460107411,
+      "fairPremium": 54.33269138713179,
+      "ytm": 0.32163178937253406,
+      "underlying": 9.30999999999912
     }
   ],
-  "snapshotId": "3c9b23b063b570ae",
+  "snapshotId": "b6fff29aa75aa917",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 310,
-    "quotedActive": 310
+    "used": 311,
+    "quotedActive": 311
   }
 }
