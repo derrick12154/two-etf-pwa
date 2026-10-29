@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-28",
-  "updatedAt": "2026-10-29T04:29:55+08:00",
+  "asOf": "2026-10-29",
+  "updatedAt": "2026-10-30T04:29:35+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -24,39 +24,49 @@
       "code": "128142",
       "name": "新乳转债",
       "price": 109.893,
-      "deviation": -18.641874717789158,
-      "premium": 34.8616760168,
-      "fairPremium": 53.503550734589155,
-      "ytm": 0.6989376152409953,
-      "underlying": 14.259999999997499
+      "deviation": -16.52898633468611,
+      "premium": 33.7362656467,
+      "fairPremium": 50.26525198138611,
+      "ytm": 0.7129660825717133,
+      "underlying": 14.379999999995
     },
     {
       "code": "123088",
       "name": "威唐转债",
-      "price": 114.706,
-      "deviation": -17.08043300600489,
-      "premium": 49.0580572917,
-      "fairPremium": 66.13849029770489,
-      "ytm": 1.965578993379042,
-      "underlying": 11.51999999999532
+      "price": 114.703,
+      "deviation": -15.784964806481995,
+      "premium": 56.3846912568,
+      "fairPremium": 72.16965606328199,
+      "ytm": 2.0285380394511803,
+      "underlying": 10.980000000003962
     },
     {
       "code": "118020",
       "name": "芳源转债",
-      "price": 115.789,
-      "deviation": -13.485769051704999,
-      "premium": 57.9966861598,
-      "fairPremium": 71.482455211505,
-      "ytm": 3.4465507822710615,
-      "underlying": 5.129999999999
+      "price": 112.202,
+      "deviation": -12.151134357659188,
+      "premium": 78.9097949886,
+      "fairPremium": 91.06092934625919,
+      "ytm": 5.202288066195707,
+      "underlying": 4.390000000001
+    },
+    {
+      "code": "123250",
+      "name": "嘉益转债",
+      "price": 118.5,
+      "deviation": 93.54076423690265,
+      "premium": 222.9882515549,
+      "fairPremium": 129.44748731799734,
+      "ytm": 0.042684966063009144,
+      "underlying": 28.93999999997568
     }
   ],
-  "snapshotId": "b03b47996f6eb13c",
+  "snapshotId": "82e1c9d8a9cba1e3",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 311,
-    "quotedActive": 311
+    "used": 310,
+    "quotedActive": 310
   }
 }
