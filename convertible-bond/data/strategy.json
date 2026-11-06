@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-11-05",
-  "updatedAt": "2026-11-06T05:32:37+08:00",
+  "asOf": "2026-11-06",
+  "updatedAt": "2026-11-07T05:01:03+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -23,20 +23,20 @@
     {
       "code": "118020",
       "name": "芳源转债",
-      "price": 112.555,
-      "deviation": -13.656833356445205,
-      "premium": 68.4662689805,
-      "fairPremium": 82.12310233694521,
-      "ytm": 5.079435730565366,
-      "underlying": 4.6100000000001
+      "price": 111.737,
+      "deviation": -14.214704198360721,
+      "premium": 71.3300666667,
+      "fairPremium": 85.54477086506073,
+      "ytm": 5.50157886367515,
+      "underlying": 4.4999999999966995
     }
   ],
-  "snapshotId": "a833c031e2b6c92e",
+  "snapshotId": "f04542aa121e48df",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 310,
-    "quotedActive": 310
+    "used": 311,
+    "quotedActive": 311
   }
 }
