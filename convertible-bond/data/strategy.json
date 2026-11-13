@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-11-12",
-  "updatedAt": "2026-11-13T05:54:21+08:00",
+  "asOf": "2026-11-13",
+  "updatedAt": "2026-11-14T05:31:33+08:00",
   "backtest": {
     "annualizedReturnPct": 19.86,
     "maxDrawdownPct": -21.69,
@@ -21,22 +21,62 @@
   },
   "bonds": [
     {
+      "code": "110087",
+      "name": "天业转债",
+      "price": 109.358,
+      "deviation": -19.246112399853942,
+      "premium": 59.8968146214,
+      "fairPremium": 79.14292702125394,
+      "ytm": 0.2532913922163993,
+      "underlying": 3.8300000000024
+    },
+    {
+      "code": "127089",
+      "name": "晶澳转债",
+      "price": 110.696,
+      "deviation": -19.14913719276079,
+      "premium": 57.1282934609,
+      "fairPremium": 76.27743065366079,
+      "ytm": 0.20662833178676232,
+      "underlying": 6.2699999999958
+    },
+    {
       "code": "118020",
       "name": "芳源转债",
-      "price": 111.564,
-      "deviation": -13.73920546451643,
-      "premium": 72.212885906,
-      "fairPremium": 85.95209137051643,
-      "ytm": 5.641249233178771,
-      "underlying": 4.470000000003301
+      "price": 111.06,
+      "deviation": -13.048550991455613,
+      "premium": 74.1622727273,
+      "fairPremium": 87.21082371875562,
+      "ytm": 5.911088087489135,
+      "underlying": 4.399999999998
+    },
+    {
+      "code": "123216",
+      "name": "科顺转债",
+      "price": 117.281,
+      "deviation": 1.8571714135991897,
+      "premium": 103.4717611549,
+      "fairPremium": 101.6145897413008,
+      "ytm": 0.32267945822468613,
+      "underlying": 3.8099999999981606
+    },
+    {
+      "code": "123250",
+      "name": "嘉益转债",
+      "price": 118.218,
+      "deviation": 50.89288333830868,
+      "premium": 174.5079729173,
+      "fairPremium": 123.61508957899133,
+      "ytm": 0.017673401541744627,
+      "underlying": 33.969999999999196
     }
   ],
-  "snapshotId": "1f69ab2f6ece73e4",
+  "snapshotId": "87e4194ee628baec",
   "modelVersion": 2,
   "dataSource": "东方财富转债历史估值及债券条款",
   "updateSchedule": "交易日收盘后自动更新；每月首个交易日按前收信号调仓",
   "marketCoverage": {
-    "used": 311,
-    "quotedActive": 311
+    "used": 313,
+    "quotedActive": 313
   }
 }
